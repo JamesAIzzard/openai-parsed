@@ -19,7 +19,7 @@ class ParsedOpenAIClient:
         *,
         model: str,
         console: Optional[Console] = None,
-        std_preface: Optional[str] = "",
+        std_preface: str = "",
         max_retries: int = 10,
         allow_decline: bool = True,
     ):
@@ -51,8 +51,8 @@ class ParsedOpenAIClient:
         return response.output_text
 
     def ensure(
-        *,
         self,
+        *,
         prompt: str,
         parser: Parser[T],
         max_retries: Optional[int] = None,
