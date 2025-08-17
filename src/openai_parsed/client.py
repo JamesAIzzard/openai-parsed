@@ -8,7 +8,7 @@ from rich.console import Console
 from rich import get_console
 
 from .exceptions import LLMDeclinedError, LLMRetriesError
-from .parser import Parser
+from .parsers.parser import Parser
 
 T = TypeVar("T", covariant=True)
 
