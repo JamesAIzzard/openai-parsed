@@ -57,10 +57,12 @@ class ParsedOpenAIClient:
         parser: Parser[T],
         max_retries: Optional[int] = None,
         allow_decline: Optional[bool] = None,
+        console: Optional[Console] = None,
     ) -> T:
         allow_decline = (
             allow_decline if allow_decline is not None else self._allow_decline
         )
+        console = console or self._console
 
         prompt = self._std_preface + prompt
 
