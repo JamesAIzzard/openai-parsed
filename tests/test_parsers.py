@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from openai_parsed.parsers.bool_parser import bool_parser
-from openai_parsed.parsers.float_parser import float_parser
-from openai_parsed.parsers.int_parser import int_parser
-from openai_parsed.parsers.string_parser import string_parser
+from openai_parsed.parsers.booleans import bool_parser
+from openai_parsed.parsers.floats import float_parser
+from openai_parsed.parsers.integers import int_parser
+from openai_parsed.parsers.strings import string_parser
 
 
 class TestStringParser:

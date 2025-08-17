@@ -6,7 +6,7 @@ import pytest
 
 from openai_parsed.client import ParsedOpenAIClient
 from openai_parsed.exceptions import LLMDeclinedError, LLMRetriesError
-from openai_parsed.parsers.string_parser import string_parser
+from openai_parsed.parsers.strings import string_parser
 
 
 class TestEnsureSuccess:
