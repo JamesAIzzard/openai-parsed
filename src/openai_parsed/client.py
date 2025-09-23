@@ -8,12 +8,12 @@ from rich.console import Console
 from rich import get_console
 
 from .exceptions import LLMDeclinedError, LLMRetriesError
-from .parser import Parser
+from .types import ParsedOpenAIClient, Parser
 
 T = TypeVar("T", covariant=True)
 
 
-class ParsedOpenAIClient:
+class _ParsedOpenAIClient(ParsedOpenAIClient):
     def __init__(
         self,
         *,
@@ -51,8 +51,8 @@ class ParsedOpenAIClient:
         return response.output_text
 
     def ensure(
-        *,
         self,
+        *,
         prompt: str,
         parser: Parser[T],
         max_retries: Optional[int] = None,
@@ -62,6 +62,8 @@ class ParsedOpenAIClient:
             allow_decline if allow_decline is not None else self._allow_decline
         )
 
+        if self._std_preface is None:
+            self._std_preface = ""
         prompt = self._std_preface + prompt
 
         if allow_decline:
