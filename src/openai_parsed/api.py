@@ -36,3 +36,18 @@ class _ParsedOpenAIAPI(ParsedOpenAIAPI):
             if allow_decline is not None
             else self._default_allow_decline,
         )
+
+
+def create_parsed_openai_api(
+    *,
+    default_model: str,
+    default_std_preface: Optional[str] = None,
+    default_max_retries: int = 10,
+    default_allow_decline: bool = True,
+) -> ParsedOpenAIAPI:
+    return _ParsedOpenAIAPI(
+        default_model=default_model,
+        default_std_preface=default_std_preface,
+        default_max_retries=default_max_retries,
+        default_allow_decline=default_allow_decline,
+    )
