@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Protocol, Optional
+from typing import TYPE_CHECKING, Optional
 
 from .client import _ParsedOpenAIClient
+from .types import ParsedOpenAIAPI
 
 if TYPE_CHECKING:
-    from .types import ParsedOpenAIClient, ParsedOpenAIAPI
+    from .types import ParsedOpenAIClient
 
 
 class _ParsedOpenAIAPI(ParsedOpenAIAPI):
