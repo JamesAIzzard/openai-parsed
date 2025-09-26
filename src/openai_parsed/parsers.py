@@ -1,0 +1,38 @@
+from __future__ import annotations
+
+from .types import Parser
+from .exceptions import ParseFailedError
+
+
+def parse_boolean(*, response: str) -> bool:
+    normalized = response.strip().lower()
+    if normalized in {"true", "yes"}:
+        return True
+    if normalized in {"false", "no"}:
+        return False
+    raise ParseFailedError(response=response)
+
+
+def parse_float(*, response: str) -> float:
+    try:
+        return float(response.strip())
+    except ValueError:
+        raise ParseFailedError(response=response)
+
+
+def parse_integer(*, response: str) -> int:
+    try:
+        return int(response.strip())
+    except ValueError:
+        raise ParseFailedError(response=response)
+
+
+class StringChoiceParser(Parser[str]):
+    def __init__(self, choices: set[str]):
+        self.choices = choices
+
+    def __call__(self, *, response: str) -> str:
+        normalized = response.strip()
+        if normalized in self.choices:
+            return normalized
+        raise ParseFailedError(response=response)
