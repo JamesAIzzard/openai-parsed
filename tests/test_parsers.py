@@ -76,27 +76,47 @@ class TestParseInteger:
 
 
 class TestStringChoiceParser:
-    def test_returns_valid_choice(self) -> None:
-        """Verify returns the string when it matches a valid choice."""
+    def test_basic_comma_separated_valid_choices(self) -> None:
+        """Verify returns only valid choices parsed via list logic."""
         parser = StringChoiceParser({"red", "green", "blue"})
-        assert parser(response="red") == "red"
+        assert parser(response="red,blue") == ["red", "blue"]
 
-    def test_strips_whitespace(self) -> None:
-        """Verify trims whitespace before validating membership."""
-        parser = StringChoiceParser({"alpha", "beta"})
-        assert parser(response="  beta \n") == "beta"
+    def test_strips_whitespace_and_ignores_empty_segments(self) -> None:
+        """Verify trims items and discards blanks before validation."""
+        parser = StringChoiceParser({"alpha", "beta", "gamma"})
+        assert parser(response="  alpha , , beta ,  gamma  ") == [
+            "alpha",
+            "beta",
+            "gamma",
+        ]
 
     def test_case_sensitivity(self) -> None:
-        """Verify membership check is case-sensitive."""
+        """Verify membership check is case-sensitive and fails on mismatch."""
         parser = StringChoiceParser({"yes", "no"})
         with pytest.raises(ParseFailedError):
             parser(response="Yes")
 
-    def test_invalid_raises(self) -> None:
-        """Verify raises ParseFailedError when value not in choices."""
+    def test_any_invalid_raises(self) -> None:
+        """Verify raises when any parsed item is not in the allowed choices."""
         parser = StringChoiceParser({"cat", "dog"})
         with pytest.raises(ParseFailedError):
-            parser(response="hamster")
+            parser(response="cat,hamster")
+
+    def test_custom_separator_and_allow_empty(self) -> None:
+        """Verify supports custom separator and allow_empty passthrough."""
+        parser = StringChoiceParser({"a", "b"}, separator=";", allow_empty=True)
+        assert parser(response=" ; ; ") == []
+        assert parser(response="a; b") == ["a", "b"]
+
+    def test_case_insensitive_option_accepts_mixed_case(self) -> None:
+        """Verify honours case_sensitive=False and returns canonical choices."""
+        parser = StringChoiceParser({"yes", "no"}, case_sensitive=False)
+        assert parser(response="Yes,NO") == ["yes", "no"]
+
+    def test_case_insensitive_collapses_duplicate_choices(self) -> None:
+        """Verify duplicates in choices collapse to a single canonical option."""
+        parser = StringChoiceParser({"YES", "yes", "No"}, case_sensitive=False)
+        assert parser(response="YES,yes,No,no") == ["yes", "yes", "No", "No"]
 
 
 class TestStringListParser:
