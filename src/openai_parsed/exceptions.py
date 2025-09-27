@@ -10,8 +10,9 @@ class LLMDeclinedError(OpenAIParserError):
 
 
 class ParseFailedError(OpenAIParserError):
-    def __init__(self, response: str):
+    def __init__(self, *, response: str, reason: str):
         self.response = response
+        self.reason = reason
 
 
 class LLMRetriesError(OpenAIParserError):

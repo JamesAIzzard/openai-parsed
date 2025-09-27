@@ -6,7 +6,7 @@ from .exceptions import ParseFailedError
 
 def parse_string(*, response: str) -> str:
     if not response.strip():
-        raise ParseFailedError(response=response)
+        raise ParseFailedError(response=response, reason="Empty string")
 
     return response
 
@@ -17,21 +17,21 @@ def parse_boolean(*, response: str) -> bool:
         return True
     if normalized in {"false", "no"}:
         return False
-    raise ParseFailedError(response=response)
+    raise ParseFailedError(response=response, reason="Not a boolean")
 
 
 def parse_float(*, response: str) -> float:
     try:
         return float(response.strip())
     except ValueError:
-        raise ParseFailedError(response=response)
+        raise ParseFailedError(response=response, reason="Not a float")
 
 
 def parse_integer(*, response: str) -> int:
     try:
         return int(response.strip())
     except ValueError:
-        raise ParseFailedError(response=response)
+        raise ParseFailedError(response=response, reason="Not an integer")
 
 
 class StringListParser(Parser[list[str]]):
@@ -44,7 +44,7 @@ class StringListParser(Parser[list[str]]):
             item.strip() for item in response.split(self._separator) if item.strip()
         ]
         if not items and not self._allow_empty:
-            raise ParseFailedError(response=response)
+            raise ParseFailedError(response=response, reason="Empty list")
         return items
 
 
@@ -70,7 +70,8 @@ class StringChoiceParser(Parser[list[str]]):
                 groups.setdefault(key, set()).add(choice)
 
             def choose_canonical(variants: set[str]) -> str:
-                # Prefer the fully lower-case variant if present, else lexicographically first.
+                # Prefer the fully lower-case variant if present,
+                # else lexicographically first.
                 return sorted(variants, key=lambda s: (s != s.lower(), s))[0]
 
             self._lower_map = {
@@ -83,7 +84,7 @@ class StringChoiceParser(Parser[list[str]]):
         items = self._list_parser(response=response)
         if self._case_sensitive:
             if any(item not in self._choices for item in items):
-                raise ParseFailedError(response=response)
+                raise ParseFailedError(response=response, reason="Invalid choice")
             return items
 
         assert self._lower_map is not None
@@ -91,6 +92,6 @@ class StringChoiceParser(Parser[list[str]]):
         for item in items:
             key = item.lower()
             if key not in self._lower_map:
-                raise ParseFailedError(response=response)
+                raise ParseFailedError(response=response, reason="Invalid choice")
             result.append(self._lower_map[key])
         return result
