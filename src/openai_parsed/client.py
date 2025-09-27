@@ -70,7 +70,7 @@ class _ParsedOpenAIClient(ParsedOpenAIClient):
             prompt += self._allow_decline_message
 
         response_log: dict[int, str] = {}
-        max_retries = max_retries or self._max_retries
+        max_retries = self._max_retries if max_retries is None else max_retries
 
         for attempt in range(1, max_retries + 1):
             logging.debug(f"Prompt:\n{prompt}")

@@ -31,8 +31,16 @@ class _ParsedOpenAIAPI(ParsedOpenAIAPI):
     ) -> ParsedOpenAIClient:
         return _ParsedOpenAIClient(
             model=model or self._default_model,
-            std_preface=std_preface or self._default_std_preface,
-            max_retries=max_retries or self._default_max_retries,
+            std_preface=(
+                std_preface
+                if std_preface is not None
+                else self._default_std_preface
+            ),
+            max_retries=(
+                max_retries
+                if max_retries is not None
+                else self._default_max_retries
+            ),
             allow_decline=allow_decline
             if allow_decline is not None
             else self._default_allow_decline,
