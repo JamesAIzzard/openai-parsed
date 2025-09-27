@@ -28,14 +28,15 @@ def parse_integer(*, response: str) -> int:
 
 
 class StringListParser(Parser[list[str]]):
-    def __init__(self, separator: str = ","):
+    def __init__(self, *, separator: str = ",", allow_empty: bool = False):
         self._separator = separator
+        self._allow_empty = allow_empty
 
     def __call__(self, *, response: str) -> list[str]:
         items = [
             item.strip() for item in response.split(self._separator) if item.strip()
         ]
-        if not items:
+        if not items and not self._allow_empty:
             raise ParseFailedError(response=response)
         return items
 

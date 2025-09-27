@@ -116,7 +116,7 @@ class TestStringListParser:
 
     def test_custom_separator(self) -> None:
         """Verify supports a custom separator character."""
-        parser = StringListParser(";")
+        parser = StringListParser(separator=";")
         assert parser(response="alpha; beta;gamma") == ["alpha", "beta", "gamma"]
 
     def test_all_empty_raises(self) -> None:
@@ -126,3 +126,15 @@ class TestStringListParser:
             parser(response="   ")
         with pytest.raises(ParseFailedError):
             parser(response=", , ,")
+
+    def test_allow_empty_returns_empty_list(self) -> None:
+        """Verify returns empty list when allow_empty=True and no items parsed."""
+        parser = StringListParser(allow_empty=True)
+        assert parser(response="   ") == []
+        assert parser(response=", , ,") == []
+        assert parser(response="") == []
+
+    def test_allow_empty_with_custom_separator(self) -> None:
+        """Verify allow_empty works with a custom separator too."""
+        parser = StringListParser(separator=";", allow_empty=True)
+        assert parser(response=" ; ; ") == []
