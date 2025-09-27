@@ -29,24 +29,24 @@ class _ParsedOpenAIClient(ParsedOpenAIClient):
         self._max_retries = max_retries
         self._allow_decline = allow_decline
         self._allow_decline_message = (
-            "If you don't have enough knowledge to provide a resonable answer, "
+            "If you don't have enough knowledge to provide a reasonable answer, "
             "respond only with the word 'DECLINED'\n"
         )
 
-    def set_std_preface(self, preface: str):
+    def set_std_preface(self, preface: str) -> None:
         self._std_preface = preface
 
-    def clear_std_preface(self):
+    def clear_std_preface(self) -> None:
         self._std_preface = ""
 
-    def _get_response(self, input: str) -> str:
+    def _get_response(self, prompt: str) -> str:
         openai.api_key = os.getenv("OPENAI_API_KEY")
         if openai.api_key is None:
             raise ValueError("Missing OPENAI_API_KEY environment variable")
 
         response = openai.responses.create(
             model=self._model,
-            input=input,
+            input=prompt,
         )
         return response.output_text
 
@@ -93,7 +93,6 @@ class _ParsedOpenAIClient(ParsedOpenAIClient):
                 self._console.log(
                     f"[yellow]Invalid response: '{raw}'. Retrying... ({attempt}/{max_retries})"
                 )
-                self._console.log(f"Retrying… ({attempt}/{max_retries})")
 
         raise LLMRetriesError(
             max_retries=max_retries, prompt=prompt, response_log=response_log
