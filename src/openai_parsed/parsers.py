@@ -27,6 +27,19 @@ def parse_integer(*, response: str) -> int:
         raise ParseFailedError(response=response)
 
 
+class StringListParser(Parser[list[str]]):
+    def __init__(self, separator: str = ","):
+        self._separator = separator
+
+    def __call__(self, *, response: str) -> list[str]:
+        items = [
+            item.strip() for item in response.split(self._separator) if item.strip()
+        ]
+        if not items:
+            raise ParseFailedError(response=response)
+        return items
+
+
 class StringChoiceParser(Parser[str]):
     def __init__(self, choices: set[str]):
         self.choices = choices
