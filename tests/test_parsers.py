@@ -7,6 +7,7 @@ from openai_parsed.parsers import (
     parse_float,
     parse_integer,
     StringChoiceParser,
+    StringListParser,
 )
 from openai_parsed.exceptions import ParseFailedError
 
@@ -96,3 +97,44 @@ class TestStringChoiceParser:
         parser = StringChoiceParser({"cat", "dog"})
         with pytest.raises(ParseFailedError):
             parser(response="hamster")
+
+
+class TestStringListParser:
+    def test_basic_comma_separated(self) -> None:
+        """Verify splits a simple comma-separated list into trimmed items."""
+        parser = StringListParser()
+        assert parser(response="a,b,c") == ["a", "b", "c"]
+
+    def test_strips_whitespace_and_ignores_empty(self) -> None:
+        """Verify trims items and discards empty segments and blanks."""
+        parser = StringListParser()
+        assert parser(response="  one , two,,  , three  ") == [
+            "one",
+            "two",
+            "three",
+        ]
+
+    def test_custom_separator(self) -> None:
+        """Verify supports a custom separator character."""
+        parser = StringListParser(separator=";")
+        assert parser(response="alpha; beta;gamma") == ["alpha", "beta", "gamma"]
+
+    def test_all_empty_raises(self) -> None:
+        """Verify raises ParseFailedError when no non-empty items are present."""
+        parser = StringListParser()
+        with pytest.raises(ParseFailedError):
+            parser(response="   ")
+        with pytest.raises(ParseFailedError):
+            parser(response=", , ,")
+
+    def test_allow_empty_returns_empty_list(self) -> None:
+        """Verify returns empty list when allow_empty=True and no items parsed."""
+        parser = StringListParser(allow_empty=True)
+        assert parser(response="   ") == []
+        assert parser(response=", , ,") == []
+        assert parser(response="") == []
+
+    def test_allow_empty_with_custom_separator(self) -> None:
+        """Verify allow_empty works with a custom separator too."""
+        parser = StringListParser(separator=";", allow_empty=True)
+        assert parser(response=" ; ; ") == []
