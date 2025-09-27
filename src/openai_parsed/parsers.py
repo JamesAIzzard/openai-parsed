@@ -4,6 +4,13 @@ from .types import Parser
 from .exceptions import ParseFailedError
 
 
+def parse_string(*, response: str) -> str:
+    if not response.strip():
+        raise ParseFailedError(response=response)
+
+    return response
+
+
 def parse_boolean(*, response: str) -> bool:
     normalized = response.strip().lower()
     if normalized in {"true", "yes"}:
@@ -52,7 +59,9 @@ class StringChoiceParser(Parser[list[str]]):
     ):
         self._choices = choices
         self._case_sensitive = case_sensitive
-        self._list_parser = StringListParser(separator=separator, allow_empty=allow_empty)
+        self._list_parser = StringListParser(
+            separator=separator, allow_empty=allow_empty
+        )
 
         if not self._case_sensitive:
             groups: dict[str, set[str]] = {}
