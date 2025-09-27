@@ -7,7 +7,7 @@ import openai
 from rich.console import Console
 from rich import get_console
 
-from .exceptions import LLMDeclinedError, LLMRetriesError
+from .exceptions import LLMDeclinedError, LLMRetriesError, ParseFailedError
 from .types import ParsedOpenAIClient, Parser
 
 T = TypeVar("T", covariant=True)
@@ -86,15 +86,14 @@ class _ParsedOpenAIClient(ParsedOpenAIClient):
                     logging.debug("Model declined response.")
                     raise LLMDeclinedError(prompt=prompt)
 
-            parsed = parser(response=raw)
-
-            if parsed is not None:
+            try:
+                parsed = parser(response=raw)
                 return parsed
-
-            self._console.log(
-                f"[yellow]Invalid response: '{raw}'. Retrying... ({attempt}/{max_retries})"
-            )
-            self._console.log(f"Retrying… ({attempt}/{max_retries})")
+            except ParseFailedError:
+                self._console.log(
+                    f"[yellow]Invalid response: '{raw}'. Retrying... ({attempt}/{max_retries})"
+                )
+                self._console.log(f"Retrying… ({attempt}/{max_retries})")
 
         raise LLMRetriesError(
             max_retries=max_retries, prompt=prompt, response_log=response_log
