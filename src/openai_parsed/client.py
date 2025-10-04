@@ -89,9 +89,9 @@ class _ParsedOpenAIClient(ParsedOpenAIClient):
             try:
                 parsed = parser(response=raw)
                 return parsed
-            except ParseFailedError:
+            except ParseFailedError as err:
                 self._console.log(
-                    f"[yellow]Invalid response: '{raw}'. Retrying... ({attempt}/{max_retries})"
+                    f"[yellow]{err.reason}: '{raw}'. Retrying... ({attempt}/{max_retries})"
                 )
 
         raise LLMRetriesError(
