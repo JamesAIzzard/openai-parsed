@@ -93,6 +93,7 @@ class _ParsedOpenAIClient(ParsedOpenAIClient):
                 self._console.log(
                     f"[yellow]{err.reason}: '{raw}'. Retrying... ({attempt}/{max_retries})"
                 )
+                logging.debug(f"Parse error: {err.reason}: '{raw}'")
 
         raise LLMRetriesError(
             max_retries=max_retries, prompt=prompt, response_log=response_log
