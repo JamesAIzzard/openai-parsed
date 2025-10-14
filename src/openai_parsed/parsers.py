@@ -62,6 +62,7 @@ class StringChoiceParser(Parser[list[str]]):
         self._list_parser = StringListParser(
             separator=separator, allow_empty=allow_empty
         )
+        self._lower_map: dict[str, str] | None
 
         if not self._case_sensitive:
             groups: dict[str, set[str]] = {}
