@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import Optional, TypeVar
-import os
 import logging
+import os
+import random
+import time
+from typing import Optional, TypeVar
 
 import openai
 from rich.console import Console
@@ -75,7 +77,24 @@ class _ParsedOpenAIClient(ParsedOpenAIClient):
         for attempt in range(1, max_retries + 1):
             logging.debug(f"Prompt:\n{prompt}")
 
-            raw = self._get_response(prompt)
+            try:
+                raw = self._get_response(prompt)
+            except openai.APIConnectionError as error:
+                response_log[attempt] = f"APIConnectionError: {error}"
+                delay = self._compute_backoff_delay(attempt=attempt)
+                logging.debug(
+                    "Retrying after APIConnectionError on attempt %s/%s; sleeping for %.2fs",
+                    attempt,
+                    max_retries,
+                    delay,
+                )
+                self._console.log(
+                    f"[yellow]Connection issue contacting OpenAI. Retrying... ({attempt}/{max_retries})"
+                )
+                if attempt == max_retries:
+                    break
+                time.sleep(delay)
+                continue
 
             logging.debug(f"Response:\n{raw}")
 
@@ -98,3 +117,13 @@ class _ParsedOpenAIClient(ParsedOpenAIClient):
         raise LLMRetriesError(
             max_retries=max_retries, prompt=prompt, response_log=response_log
         )
+
+    @staticmethod
+    def _compute_backoff_delay(*, attempt: int) -> float:
+        # Jitter keeps multiple callers from retrying in lockstep.
+        base = 0.5
+        factor = 2.0
+        cap = 8.0
+        delay = min(cap, base * (factor ** (attempt - 1)))
+        jitter_fraction = random.uniform(-0.15, 0.15)
+        return max(0.0, delay * (1 + jitter_fraction))
